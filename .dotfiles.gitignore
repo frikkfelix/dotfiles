@@ -1,0 +1,49 @@
+# SSH keys and configs
+.ssh/id_*
+.ssh/*.pem
+.ssh/known_hosts
+
+# Cloud credentials
+.aws/credentials
+.aws/config
+.gcloud/
+.azure/
+
+# API keys and secrets
+*.secret
+*.private
+.env
+.env.*
+*_secret*
+*_private*
+
+# History files
+.*history
+.bash_history
+.zsh_history
+.node_repl_history
+.python_history
+.lesshst
+
+# Application secrets
+.config/gh/hosts.yml
+.config/hub
+.docker/config.json
+.kube/config
+.npmrc
+.pypirc
+.netrc
+
+# Tokens and sessions
+.config/gcloud/
+.config/op/
+.local/share/keyrings/
+
+# Other sensitive data
+.gnupg/
+.password-store/
+.Trash/
+.cache/
+Downloads/
+Documents/
+Private/
