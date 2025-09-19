@@ -1,0 +1,14 @@
+set relativenumber
+set number
+set showmode
+set hlsearch
+
+""" plugins
+Plug 'machakann/vim-highlightedyank'
+Plug 'tpope/vim-surround'
+Plug 'tpope/vim-commentary'
+
+let g:highlightedyank_highlight_duration = "100"
+let g:highlightedyank_highlight_color = "rgba(0, 183, 255, 0.8)"
+
+nmap gi :action GotoImplementation<CR>
