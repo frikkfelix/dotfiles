@@ -32,8 +32,6 @@ vim.keymap.set('n', '<leader>pv', vim.cmd.Ex)
 vim.keymap.set({ 'n', 'v' }, '<Space>', '<Nop>', { silent = true })
 vim.keymap.set('n', 'k', "v:count == 0 ? 'gk' : 'k'", { expr = true, silent = true })
 vim.keymap.set('n', 'j', "v:count == 0 ? 'gj' : 'j'", { expr = true, silent = true })
-vim.keymap.set('n', '[d', vim.diagnostic.goto_prev)
-vim.keymap.set('n', ']d', vim.diagnostic.goto_next)
 vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float)
 vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist)
 
@@ -44,11 +42,46 @@ if not vim.loop.fs_stat(lazypath) then
 end
 vim.opt.rtp:prepend(lazypath)
 
+
+-- Configure LSP
+local on_attach = function(_, bufnr)
+  print("LSP attached to buffer " .. bufnr)
+  local nmap = function(keys, func)
+  vim.keymap.set('n', keys, func, { buffer = bufnr })
+  end
+
+  nmap('<leader>rn', vim.lsp.buf.rename)
+  nmap('<leader>ca', vim.lsp.buf.code_action)
+  nmap('<leader>fm', vim.lsp.buf.format)
+
+  nmap('gd', require('telescope.builtin').lsp_definitions)
+  nmap('gr', require('telescope.builtin').lsp_references)
+  nmap('gi', require('telescope.builtin').lsp_implementations)
+
+  nmap('K', vim.lsp.buf.hover)
+  nmap('<C-k>', vim.lsp.buf.signature_help)
+end
+
+
 -- Configure plugins
 require('lazy').setup({
   -- Detect tabstop and shiftwidth automatically
   'tpope/vim-sleuth',
 
+  {
+    "folke/lazydev.nvim",
+    ft = "lua", -- only load on lua files
+    opts = {
+      library = {
+        -- See the configuration section for more details
+        -- Load luvit types when the `vim.uv` word is found
+        { path = "${3rd}/luv/library", words = { "vim%.uv" } },
+      },
+      lspconfig = {
+        on_attach = on_attach, -- Reference it here
+      },
+    },
+  },
   -- Harpoon
   {
     "ThePrimeagen/harpoon",
@@ -207,24 +240,6 @@ vim.defer_fn(function()
   }
 end, 0)
 
--- Configure LSP
-local on_attach = function(_, bufnr)
-  local nmap = function(keys, func)
-    vim.keymap.set('n', keys, func, { buffer = bufnr })
-  end
-
-  nmap('<leader>rn', vim.lsp.buf.rename)
-  nmap('<leader>ca', vim.lsp.buf.code_action)
-  nmap('<leader>f', vim.lsp.buf.format)
-
-  nmap('gd', require('telescope.builtin').lsp_definitions)
-  nmap('gr', require('telescope.builtin').lsp_references)
-  nmap('gi', require('telescope.builtin').lsp_implementations)
-
-  nmap('K', vim.lsp.buf.hover)
-  nmap('<C-k>', vim.lsp.buf.signature_help)
-end
-
 -- mason-lspconfig requires that these setup functions are called in this order
 -- before setting up the servers.
 require('mason').setup()
@@ -234,7 +249,6 @@ require('mason-lspconfig').setup()
 local servers = {
   gopls = {},
   rust_analyzer = {},
-  tsserver = {},
   html = { filetypes = { 'html', 'twig', 'hbs' } },
 
   lua_ls = {
@@ -242,7 +256,7 @@ local servers = {
       workspace = { checkThirdParty = false },
       telemetry = { enable = false },
       diagnostics = {
-        globals = { 'vim', 'use', 'describe', 'it', 'before_each', 'after_each' },
+        globals = { 'use', 'describe', 'it', 'before_each', 'after_each' },
       },
     },
   },
@@ -259,16 +273,18 @@ mason_lspconfig.setup {
   ensure_installed = vim.tbl_keys(servers),
 }
 
-mason_lspconfig.setup_handlers {
-  function(server_name)
-    require('lspconfig')[server_name].setup {
-      capabilities = capabilities,
-      on_attach = on_attach,
-      settings = servers[server_name],
-      filetypes = (servers[server_name] or {}).filetypes,
-    }
-  end,
-}
+mason_lspconfig.setup({
+  handlers = {
+    function(server_name)
+      require('lspconfig')[server_name].setup {
+        capabilities = capabilities,
+        on_attach = on_attach,
+        settings = servers[server_name],
+        filetypes = (servers[server_name] or {}).filetypes,
+      }
+    end,
+  }
+})
 
 -- [[ Configure nvim-cmp ]]
 local cmp = require 'cmp'
