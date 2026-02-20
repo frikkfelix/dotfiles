@@ -229,7 +229,7 @@ vim.keymap.set('n', '<leader>sg', require('telescope.builtin').live_grep)
 -- Treesitter
 vim.defer_fn(function()
   require('nvim-treesitter.configs').setup {
-    ensure_installed = { 'go', 'lua', 'python', 'rust', 'javascript', 'typescript', 'vimdoc', 'vim', 'bash', 'java' },
+    ensure_installed = { 'go', 'lua', 'python', 'rust', 'javascript', 'typescript', 'vimdoc', 'vim', 'bash', 'swift' },
     auto_install = false,
     highlight = { enable = true },
     indent = { enable = true },
@@ -285,6 +285,16 @@ mason_lspconfig.setup({
     end,
   }
 })
+
+vim.lsp.config.sourcekit = {
+  cmd = { 'sourcekit-lsp' },
+  filetypes = { 'swift' },
+  root_markers = { 'Package.swift', '.git' },
+  capabilities = capabilities,
+  on_attach = on_attach,
+}
+
+vim.lsp.enable('sourcekit')
 
 -- [[ Configure nvim-cmp ]]
 local cmp = require 'cmp'
